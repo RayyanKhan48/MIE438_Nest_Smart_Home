@@ -17,10 +17,10 @@ const float upper_lim = 26.0;
 
 //fan speed constants (PWM values: 0-255)
 
-const int fan_off = 0.5; // change to using the relay to turn the fan off?
-const int fan_low = 85;
-const int fan_med = 170;
-const int fan_high = 255;
+const int FAN_OFF = 0.5; // change to using the relay to turn the fan off?
+const int FAN_LOW = 85;
+const int FAN_MEDIUM = 170;
+const int FAN_HIGH = 255;
 
 //other variable definitions
 Adafruit_TMP117 tmp117; //this was from the temp test, define other variable definitions here
@@ -101,3 +101,4 @@ void loop() {
 
 
 }
+
