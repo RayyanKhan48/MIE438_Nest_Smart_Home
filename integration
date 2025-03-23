@@ -1,0 +1,104 @@
+//inclusion libraries for fan, temp sensor, heater
+#include <Wire.h>
+#include <Adafruit_TMP117.h>
+#include <Adafruit_Sensor.h>
+
+/*pin defintions
+
+#define LED_PIN 7; //this is just an example number, depending on what pin we are using for each component connected to the ESP32
+#define FAN_PIN 5; // the fan should have one pin connected to esp32 (PWM signal pin,or is it RPM?)
+#define HEATER_PIN 6;
+*/
+
+// temperature constants
+const float ideal_temp = 20.0;
+const float lower_lim = 10.0;
+const float upper_lim = 26.0; 
+
+//fan speed constants (PWM values: 0-255)
+
+const int FAN_OFF = 0.5; // change to using the relay to turn the fan off?
+const int FAN_LOW = 85;
+const int FAN_MEDIUM = 170;
+const int FAN_HIGH = 255;
+
+//other variable definitions
+Adafruit_TMP117 tmp117; //this was from the temp test, define other variable definitions here
+
+
+void setup() {
+  Serial.begin(115200);
+  while (!Serial) delay(10);  // Pause until serial console opens
+
+
+  //initialize pins
+  pinMode(FAN_PIN, OUTPUT);
+  pinMode(HEATER_PIN, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
+
+  //set initial state at beginning, LED always on
+  analogWrite(FAN_PIN, FAN_MEDIUM);  // Fan at medium speed
+  digitalWrite(HEATER_PIN, LOW);     // Heater off
+  digitalWrite(LED_PIN, HIGH);       // LED on
+
+  // Initialize I2C on specific pins (optional if using default pins)
+  Wire.begin(8, 9); // SDA = GPIO 8, SCL = GPIO 9
+
+  // Try to initialize the TMP117 sensor
+  if (!tmp117.begin()) {
+    Serial.println("Failed to find TMP117 chip");
+    while (1) { delay(10); }
+  }
+  Serial.println("TMP117 Found!");
+  
+
+}
+
+//function to control fan speed
+void setFanSpeed(int speed) {
+  analogWrite(FAN_PIN, speed);
+  Serial.print("Fan speed set to: ");
+  Serial.println(speed);
+}
+
+// Function to control heater
+void setHeater(bool state) {
+  digitalWrite(HEATER_PIN, state);
+  Serial.print("Heater: ");
+  Serial.println(state ? "ON" : "OFF");
+
+  //insert proper heater logic code here (did not have it)
+}
+
+void loop() {
+  // get temperature reading
+  sensors_event_t temp; // Create an empty event
+  tmp117.getEvent(&temp); // Fill the event with the current temperature measurement
+  float currentTemp = temp.temperature;
+
+  Serial.print("Temperature: ");
+  Serial.print(currentTemp);
+  Serial.println(" °C");
+
+  // Automatic temperature control logic
+  if (currentTemp > UPPER_LIMIT) {
+    Serial.print("exceeded upper limit");
+    setHeater(false);         // Turn off heater
+    setFanSpeed(FAN_HIGH);    // Maximum cooling
+  }
+  else if (currentTemp < LOWER_LIMIT) {
+    Serial.print("exceeded lower limit");
+    setHeater(true);          // Turn on heater
+    setFanSpeed(FAN_LOW);     // Minimum fan speed
+  }
+  else {  // currentTemp == IDEAL_TEMP
+    Serial.print("within temp limits, no change in state ");
+    setFanSpeed(FAN_MEDIUM);  // Maintain medium speed
+    setHeater(false);         // Heater off at ideal temp
+  }
+
+  delay(1000);  // Check every second
+
+
+}
+
