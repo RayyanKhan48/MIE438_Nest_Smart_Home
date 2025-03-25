@@ -3,6 +3,8 @@
 #include "SD.h"
 #include "FS.h"
 
+
+//5V and GND
 // microSD Card Reader connections
 #define SD_CS          5
 #define SPI_MOSI      11
