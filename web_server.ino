@@ -2,7 +2,7 @@
 #include <WiFi.h>
 
 // Replace with your network credentials
-const char* ssid = "ESP32"; // will have to search for this name under the wifi (Eduroam wifi or UofT wifi)
+const char* ssid = "ESP32"; // will have to search for this name under the wifi 
 const char* password = "1234";
 
 // Set web server port number to 80
