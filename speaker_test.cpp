@@ -1,40 +1,23 @@
-/*
-  ESP32 SD I2S Music Player
-  esp32-i2s-sd-player.ino
-  Plays MP3 file from microSD card
-  Uses MAX98357 I2S Amplifier Module
-  Uses ESP32-audioI2S Library - https://github.com/schreibfaul1/ESP32-audioI2S
-  * 
-  DroneBot Workshop 2022
-  https://dronebotworkshop.com
-*/
-
-// Include required libraries
-
-
-//To compile change the Partition Scheme to "Huge App (3MB No OTA)"
-
 #include "Arduino.h"
 #include "Audio.h"
 #include "SD.h"
 #include "FS.h"
- 
+
 // microSD Card Reader connections
 #define SD_CS          5
-#define SPI_MOSI      23 
-#define SPI_MISO      19
-#define SPI_SCK       18
- 
+#define SPI_MOSI      11
+#define SPI_MISO      12
+#define SPI_SCK       13
+
 // I2S Connections
-#define I2S_DOUT      22
-#define I2S_BCLK      26
-#define I2S_LRC       25
- 
- // Create Audio object
+#define I2S_DOUT      16
+#define I2S_BCLK      17
+#define I2S_LRC       18
+
+// Create Audio object
 Audio audio;
- 
+
 void setup() {
-    
     // Set microSD Card CS as OUTPUT and set HIGH
     pinMode(SD_CS, OUTPUT);      
     digitalWrite(SD_CS, HIGH); 
@@ -46,24 +29,30 @@ void setup() {
     Serial.begin(115200);
     
     // Start microSD Card
-    if(!SD.begin(SD_CS))
-    {
-      Serial.println("Error accessing microSD card!");
-      while(true); 
+    if(!SD.begin(SD_CS)) {
+        Serial.println("Error accessing microSD card!");
+        while(true); 
     }
-    
+    Serial.println("microSD card initialized successfully!");
+
+    // Check if the file exists
+    File musicFile = SD.open("/aria.wav");
+    if (musicFile) {
+        Serial.println("File opened successfully");
+    } else {
+        Serial.println("Failed to open file");
+    }
+
     // Setup I2S 
     audio.setPinout(I2S_BCLK, I2S_LRC, I2S_DOUT);
     
-    // Set Volume
-    audio.setVolume(5);
+    // Set Volume (adjust this if necessary)
+    audio.setVolume(21);
     
     // Open music file
-    audio.connecttoFS(SD,"/MYMUSIC.mp3");
-    
+    audio.connecttoFS(SD, "/aria.wav");
 }
- 
-void loop()
-{
+
+void loop() {
     audio.loop();    
 }
