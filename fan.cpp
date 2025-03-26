@@ -24,9 +24,10 @@ void setup() {
 void loop() {
   // put your main code here, to run repeatedly:
   digitalWrite(FAN_PIN, HIGH);   
-  analogWrite(PWM, FAN_MEDIUM);
-  delay(10000);
+  //analogWrite(PWM, FAN_MEDIUM);
+  delay(30000);
   digitalWrite(FAN_PIN, LOW);
+  analogWrite(PWM, FAN_MEDIUM);
   delay(10000);
 
 }
