@@ -10,7 +10,7 @@ void setup() {
   Serial.println("Adafruit TMP117 test on ESP32-S3!");
 
   // Initialize I2C on specific pins (optional if using default pins)
-  Wire.begin(8, 9); // SDA = GPIO 8, SCL = GPIO 9
+  Wire.begin(1, 2); // SDA = GPIO 1, SCL = GPIO 2
 
   // Try to initialize the TMP117 sensor
   if (!tmp117.begin()) {
