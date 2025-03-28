@@ -2,47 +2,72 @@
 #include <Wire.h>
 #include <Adafruit_TMP117.h>
 #include <Adafruit_Sensor.h>
+//#include <Adafruit_NeoPixel.h> 
 
-/*pin defintions
 
-#define LED_PIN 7; //this is just an example number, depending on what pin we are using for each component connected to the ESP32
-#define FAN_PIN 5; // the fan should have one pin connected to esp32 (PWM signal pin,or is it RPM?)
-#define HEATER_PIN 6;
+/*
+_________________________________________________________________
+DEFINING PARAMTERS
+__________________________________________________________________
+
 */
 
+//fan pins
+#define FAN_PIN 10
+#define RPM 48
+#define PWM 45
+
+//heater pins
+#define HEATER_PIN 9
+
+// //LED pins
+// #define PIN 38 // ESP32-C3 built-in RGB led
+// #define NUMPIXELS 1
+// Adafruit_NeoPixel pixels (NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+// #define DELAYVAL 500
+
 // temperature constants
-const float ideal_temp = 20.0;
-const float lower_lim = 10.0;
-const float upper_lim = 26.0; 
+const float IDEAL_TEMP = 25.5;
+const float LOWER_LIM = 24.0;
+const float UPPER_LIM = 28.0; 
 
 //fan speed constants (PWM values: 0-255)
-
-const int FAN_OFF = 0.5; // change to using the relay to turn the fan off?
-const int FAN_LOW = 85;
-const int FAN_MEDIUM = 170;
+const int FAN_LOW = 30;
+const int FAN_MEDIUM = 170; 
 const int FAN_HIGH = 255;
 
-//other variable definitions
-Adafruit_TMP117 tmp117; //this was from the temp test, define other variable definitions here
+Adafruit_TMP117 tmp117; //object instance for temp sensor
 
+/*
+_________________________________________________________________
+INITIAL MODE
+__________________________________________________________________
+
+*/
 
 void setup() {
   Serial.begin(115200);
   while (!Serial) delay(10);  // Pause until serial console opens
 
 
-  //initialize pins
+  //fan pins
+  //due to wiring, in pinMode for fan, HIGH ==off, LOW ==on
   pinMode(FAN_PIN, OUTPUT);
-  pinMode(HEATER_PIN, OUTPUT);
-  pinMode(LED_PIN, OUTPUT);
+  pinMode(PWM, OUTPUT);
+  digitalWrite(FAN_PIN, HIGH);  //fan off
 
-  //set initial state at beginning, LED always on
-  analogWrite(FAN_PIN, FAN_MEDIUM);  // Fan at medium speed
+  //heater pins
+  pinMode(HEATER_PIN, OUTPUT);
   digitalWrite(HEATER_PIN, LOW);     // Heater off
+
+
+  //LED pins
+  pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);       // LED on
 
-  // Initialize I2C on specific pins (optional if using default pins)
-  Wire.begin(8, 9); // SDA = GPIO 8, SCL = GPIO 9
+
+  // Temp sensor: initialize I2C on specific pins 
+  Wire.begin(1, 2); // SDA = GPIO 1, SCL = GPIO 2
 
   // Try to initialize the TMP117 sensor
   if (!tmp117.begin()) {
@@ -54,21 +79,12 @@ void setup() {
 
 }
 
-//function to control fan speed
-void setFanSpeed(int speed) {
-  analogWrite(FAN_PIN, speed);
-  Serial.print("Fan speed set to: ");
-  Serial.println(speed);
-}
+/*
+_________________________________________________________________
+ENTERING LOOP
+__________________________________________________________________
 
-// Function to control heater
-void setHeater(bool state) {
-  digitalWrite(HEATER_PIN, state);
-  Serial.print("Heater: ");
-  Serial.println(state ? "ON" : "OFF");
-
-  //insert proper heater logic code here (did not have it)
-}
+*/
 
 void loop() {
   // get temperature reading
@@ -79,26 +95,35 @@ void loop() {
   Serial.print("Temperature: ");
   Serial.print(currentTemp);
   Serial.println(" °C");
+  
+  //automatic temp control logic
+  if (currentTemp < LOWER_LIMIT) {
+  Serial.print("exceeded lower limit");
+  digitalWrite(HEATER_PIN, HIGH); // Turn on heater
+  digitalWrite(FAN_PIN, HIGH); //turn of fan
+  }
 
-  // Automatic temperature control logic
-  if (currentTemp > UPPER_LIMIT) {
+
+  else if (currentTemp > UPPER_LIMIT) {
     Serial.print("exceeded upper limit");
-    setHeater(false);         // Turn off heater
-    setFanSpeed(FAN_HIGH);    // Maximum cooling
-  }
-  else if (currentTemp < LOWER_LIMIT) {
-    Serial.print("exceeded lower limit");
-    setHeater(true);          // Turn on heater
-    setFanSpeed(FAN_LOW);     // Minimum fan speed
-  }
-  else {  // currentTemp == IDEAL_TEMP
-    Serial.print("within temp limits, no change in state ");
-    setFanSpeed(FAN_MEDIUM);  // Maintain medium speed
-    setHeater(false);         // Heater off at ideal temp
+    digitalWrite(HEATER_PIN, LOW); //turn off heater
+    //maximum cooling
+    digitalWrite(FAN_PIN, LOW); 
+    analogWrite(PWM, FAN_HIGH);
   }
 
-  delay(1000);  // Check every second
+  else {  
+    // currentTemp == IDEAL_TEMP
+    Serial.print("within temp limits, no change in state ");
+    //fan at medium speed
+    digitalWrite(HEATER_PIN, LOW); //turn off heater
+    digitalWrite(FAN_PIN, LOW); //turn on fan
+    analogWrite(PWM, FAN_LOW); //keep it at minimum speed
+    
+  }
+
+
+  delay(10000);  // Check every 10 sec
 
 
 }
-
