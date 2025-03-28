@@ -14,8 +14,8 @@ __________________________________________________________________
 
 //fan pins
 #define FAN_PIN 10
-#define RPM 48
-#define PWM 45
+#define RPM 47
+#define PWM 48
 
 //heater pins
 #define HEATER_PIN 9
@@ -27,12 +27,12 @@ __________________________________________________________________
 // #define DELAYVAL 500
 
 // temperature constants
-const float IDEAL_TEMP = 25.5;
-const float LOWER_LIM = 24.0;
-const float UPPER_LIM = 28.0; 
+const float IDEAL_TEMP = 25.0;
+const float LOWER_LIM = 23.0;
+const float UPPER_LIM = 26.0; 
 
 //fan speed constants (PWM values: 0-255)
-const int FAN_LOW = 30;
+const int FAN_LOW = 1;
 const int FAN_MEDIUM = 170; 
 const int FAN_HIGH = 255;
 
@@ -57,13 +57,14 @@ void setup() {
   digitalWrite(FAN_PIN, HIGH);  //fan off
 
   //heater pins
+  //due to wiring, in pinMode for heater, HIGH ==off, LOW ==on
   pinMode(HEATER_PIN, OUTPUT);
-  digitalWrite(HEATER_PIN, LOW);     // Heater off
+  digitalWrite(HEATER_PIN, HIGH);     // Heater off
 
 
   //LED pins
-  pinMode(LED_PIN, OUTPUT);
-  digitalWrite(LED_PIN, HIGH);       // LED on
+  //pinMode(LED_PIN, OUTPUT);
+  //digitalWrite(LED_PIN, HIGH);       // LED on
 
 
   // Temp sensor: initialize I2C on specific pins 
@@ -97,33 +98,31 @@ void loop() {
   Serial.println(" °C");
   
   //automatic temp control logic
-  if (currentTemp < LOWER_LIMIT) {
-  Serial.print("exceeded lower limit");
-  digitalWrite(HEATER_PIN, HIGH); // Turn on heater
+  if (currentTemp < LOWER_LIM) {
+ Serial.println("exceeded lower limit, turning on heater and off fan");
+  digitalWrite(HEATER_PIN, LOW); // Turn on heater
   digitalWrite(FAN_PIN, HIGH); //turn of fan
   }
 
 
-  else if (currentTemp > UPPER_LIMIT) {
-    Serial.print("exceeded upper limit");
-    digitalWrite(HEATER_PIN, LOW); //turn off heater
+  else if (currentTemp > UPPER_LIM) {
+     Serial.println("exceeded upper limit, turning on fan and off heater");
+    digitalWrite(HEATER_PIN, HIGH); //turn off heater
     //maximum cooling
-    digitalWrite(FAN_PIN, LOW); 
+    digitalWrite(FAN_PIN, LOW); //turn on fan to max speed 
     analogWrite(PWM, FAN_HIGH);
   }
 
-  else {  
+  else if (currentTemp >= LOWER_LIM && currentTemp <= UPPER_LIM ) {  
     // currentTemp == IDEAL_TEMP
-    Serial.print("within temp limits, no change in state ");
+     Serial.println("within temp limits, no change in state ");
     //fan at medium speed
-    digitalWrite(HEATER_PIN, LOW); //turn off heater
+    digitalWrite(HEATER_PIN, HIGH); //turn off heater
     digitalWrite(FAN_PIN, LOW); //turn on fan
     analogWrite(PWM, FAN_LOW); //keep it at minimum speed
     
   }
 
-
-  delay(10000);  // Check every 10 sec
-
+  delay(2000);  // Check every 10 sec
 
 }
