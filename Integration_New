@@ -1,0 +1,128 @@
+//inclusion libraries for fan, temp sensor, heater
+#include <Wire.h>
+#include <Adafruit_TMP117.h>
+#include <Adafruit_Sensor.h>
+//#include <Adafruit_NeoPixel.h> 
+
+
+/*
+_________________________________________________________________
+DEFINING PARAMTERS
+__________________________________________________________________
+
+*/
+
+//fan pins
+#define FAN_PIN 10
+#define RPM 47
+#define PWM 48
+
+//heater pins
+#define HEATER_PIN 9
+
+// //LED pins
+// #define PIN 38 // ESP32-C3 built-in RGB led
+// #define NUMPIXELS 1
+// Adafruit_NeoPixel pixels (NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+// #define DELAYVAL 500
+
+// temperature constants
+const float IDEAL_TEMP = 25.0;
+const float LOWER_LIM = 23.0;
+const float UPPER_LIM = 26.0; 
+
+//fan speed constants (PWM values: 0-255)
+const int FAN_LOW = 1;
+const int FAN_MEDIUM = 170; 
+const int FAN_HIGH = 255;
+
+Adafruit_TMP117 tmp117; //object instance for temp sensor
+
+/*
+_________________________________________________________________
+INITIAL MODE
+__________________________________________________________________
+
+*/
+
+void setup() {
+  Serial.begin(115200);
+  while (!Serial) delay(10);  // Pause until serial console opens
+
+
+  //fan pins
+  //due to wiring, in pinMode for fan, HIGH ==off, LOW ==on
+  pinMode(FAN_PIN, OUTPUT);
+  pinMode(PWM, OUTPUT);
+  digitalWrite(FAN_PIN, HIGH);  //fan off
+
+  //heater pins
+  //due to wiring, in pinMode for heater, HIGH ==off, LOW ==on
+  pinMode(HEATER_PIN, OUTPUT);
+  digitalWrite(HEATER_PIN, HIGH);     // Heater off
+
+
+  //LED pins
+  //pinMode(LED_PIN, OUTPUT);
+  //digitalWrite(LED_PIN, HIGH);       // LED on
+
+
+  // Temp sensor: initialize I2C on specific pins 
+  Wire.begin(1, 2); // SDA = GPIO 1, SCL = GPIO 2
+
+  // Try to initialize the TMP117 sensor
+  if (!tmp117.begin()) {
+    Serial.println("Failed to find TMP117 chip");
+    while (1) { delay(10); }
+  }
+  Serial.println("TMP117 Found!");
+  
+
+}
+
+/*
+_________________________________________________________________
+ENTERING LOOP
+__________________________________________________________________
+
+*/
+
+void loop() {
+  // get temperature reading
+  sensors_event_t temp; // Create an empty event
+  tmp117.getEvent(&temp); // Fill the event with the current temperature measurement
+  float currentTemp = temp.temperature;
+
+  Serial.print("Temperature: ");
+  Serial.print(currentTemp);
+  Serial.println(" °C");
+  
+  //automatic temp control logic
+  if (currentTemp < LOWER_LIM) {
+ Serial.println("exceeded lower limit, turning on heater and off fan");
+  digitalWrite(HEATER_PIN, LOW); // Turn on heater
+  digitalWrite(FAN_PIN, HIGH); //turn of fan
+  }
+
+
+  else if (currentTemp > UPPER_LIM) {
+     Serial.println("exceeded upper limit, turning on fan and off heater");
+    digitalWrite(HEATER_PIN, HIGH); //turn off heater
+    //maximum cooling
+    digitalWrite(FAN_PIN, LOW); //turn on fan to max speed 
+    analogWrite(PWM, FAN_HIGH);
+  }
+
+  else if (currentTemp >= LOWER_LIM && currentTemp <= UPPER_LIM ) {  
+    // currentTemp == IDEAL_TEMP
+     Serial.println("within temp limits, no change in state ");
+    //fan at medium speed
+    digitalWrite(HEATER_PIN, HIGH); //turn off heater
+    digitalWrite(FAN_PIN, LOW); //turn on fan
+    analogWrite(PWM, FAN_LOW); //keep it at minimum speed
+    
+  }
+
+  delay(2000);  // Check every 10 sec
+
+}
