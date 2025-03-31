@@ -31,7 +31,7 @@ String fan_pin_state = "off";
 String auto_pin_state = "off";
 
 // Assign output variables to GPIO pins
-const int LED_pin = 38;
+const int LED_pin = 22;
 const int heat_pin = 9;
 const int fan_pin = 10;
 const int tmp_SDA = 1;
@@ -41,13 +41,13 @@ const int fan_RPM = 47;
 
 
 // SPI and I2S connections for the speaker
-#define SD_CS 5
-#define SPI_MOSI 11
-#define SPI_MISO 12
-#define SPI_SCK 13
-#define I2S_DOUT 16
-#define I2S_BCLK 17
-#define I2S_LRC 18
+#define SD_CS 41
+#define SPI_MOSI 39
+#define SPI_MISO 38
+#define SPI_SCK 40
+#define I2S_DOUT 4
+#define I2S_BCLK 5
+#define I2S_LRC 6
 
 // Audio object
 Audio audio;
