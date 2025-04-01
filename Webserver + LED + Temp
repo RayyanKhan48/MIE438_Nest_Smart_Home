@@ -41,7 +41,7 @@ float currentTemperature = 0.0;
 void sendWebPage(WiFiClient& client) {
     client.println("<!DOCTYPE html><html>");
     client.println("<head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-    client.println("<meta http-equiv=\"refresh\" content=\"5\">");  // Refresh every 5 seconds
+    client.println("<meta http-equiv=\"refresh\" content=\"2\">");  // Refresh every 5 seconds
     client.println("<link rel=\"icon\" href=\"data:,\">");
     client.println("<style>");
     client.println("html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;} ");
@@ -49,7 +49,7 @@ void sendWebPage(WiFiClient& client) {
     client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;} ");
     client.println(".button2 { background-color: #F52718; }");
     client.println("</style></head>");
-    client.println("<body><h1>MIE480 NEST SMART HOME PROJECT</h1>");
+    client.println("<body><h1>MIE438 NEST SMART HOME PROJECT</h1>");
 
     // Display temperature
     client.println("<p>Current Temperature: " + String(currentTemperature) + " &deg;C</p>");
@@ -66,9 +66,9 @@ void sendWebPage(WiFiClient& client) {
 void sendButton(WiFiClient& client, const String& pin_name, String& pin_state) {
     client.println("<p>" + pin_name + " - State: " + pin_state + "</p>");
     if (pin_state == "off") {
-        client.println("<p><a href=\"/" + pin_name + "/on\"><button class=\"button\">ON</button></a></p>");
+        client.println("<p><a href=\"/" + pin_name + "/on\"><button class=\"button button2\">OFF</button></a></p>");
     } else {
-        client.println("<p><a href=\"/" + pin_name + "/off\"><button class=\"button button2\">OFF</button></a></p>");
+        client.println("<p><a href=\"/" + pin_name + "/off\"><button class=\"button\">ON</button></a></p>");
     }
 }
 
@@ -155,19 +155,19 @@ void loop() {
                         } else if (header.indexOf("GET /HEAT/on") >= 0) {
                             Serial.println("Turning HEAT ON");
                             heat_pin_state = "on";
-                            digitalWrite(heat_pin, HIGH);
+                            digitalWrite(heat_pin, LOW);
                         } else if (header.indexOf("GET /HEAT/off") >= 0) {
                             Serial.println("Turning HEAT OFF");
                             heat_pin_state = "off";
-                            digitalWrite(heat_pin, LOW);
+                            digitalWrite(heat_pin, HIGH);
                         } else if (header.indexOf("GET /FAN/on") >= 0) {
                             Serial.println("Turning FAN ON");
                             fan_pin_state = "on";
-                            digitalWrite(fan_pin, HIGH);
+                            digitalWrite(fan_pin, LOW);
                         } else if (header.indexOf("GET /FAN/off") >= 0) {
                             Serial.println("Turning FAN OFF");
                             fan_pin_state = "off";
-                            digitalWrite(fan_pin, LOW);
+                            digitalWrite(fan_pin, HIGH);
                         }
 
                         // Send the web page to the client
