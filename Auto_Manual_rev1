@@ -99,9 +99,10 @@ void automaticControl() {
     if (currentTemperature < LOWER_LIM) {
         Serial.println("Exceeded lower limit, turning on heater and off fan");
         digitalWrite(heat_pin, LOW); // Turn on heater
-        digitalWrite(fan_pin, HIGH); // Turn off fan
+        digitalWrite(fan_pin, LOW); // Turn on fan
+        analogWrite(PWM, FAN_LOW);
         heat_pin_state = "on";
-        fan_pin_state = "off";
+        fan_pin_state = "on";
     } else if (currentTemperature > UPPER_LIM) {
         Serial.println("Exceeded upper limit, turning on fan and off heater");
         digitalWrite(heat_pin, HIGH); // Turn off heater
