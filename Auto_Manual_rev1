@@ -221,6 +221,7 @@ void loop() {
                             Serial.println("Turning FAN ON");
                             fan_pin_state = "on";
                             digitalWrite(fan_pin, LOW);
+                            analogWrite(PWM, FAN_HIGH);
                         } else if (header.indexOf("GET /FAN/off") >= 0) {
                             Serial.println("Turning FAN OFF");
                             fan_pin_state = "off";
