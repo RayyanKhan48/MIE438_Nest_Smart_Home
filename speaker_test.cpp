@@ -6,15 +6,16 @@
 
 //5V and GND
 // microSD Card Reader connections
-#define SD_CS          5
-#define SPI_MOSI      11
-#define SPI_MISO      12
-#define SPI_SCK       13
+#define SD_CS 41
+#define SPI_MOSI 39
+#define SPI_MISO 38
+#define SPI_SCK 40
 
 // I2S Connections
-#define I2S_DOUT      16
-#define I2S_BCLK      17
-#define I2S_LRC       18
+#define I2S_DOUT 4
+#define I2S_BCLK 5
+#define I2S_LRC 6
+
 
 // Create Audio object
 Audio audio;

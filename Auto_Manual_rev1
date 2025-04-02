@@ -17,7 +17,7 @@ String header;
 String LED_pin_state = "off";
 String heat_pin_state = "off";
 String fan_pin_state = "off";
-String mode_state = "manual"; // Default to manual mode
+String mode_state = "Manual"; // Default to Manual mode
 
 // Assign output variables to GPIO pins
 const int LED_pin = 38;
@@ -54,10 +54,11 @@ void sendWebPage(WiFiClient& client) {
     client.println("<meta http-equiv=\"refresh\" content=\"2\">");  // Refresh every 5 seconds
     client.println("<link rel=\"icon\" href=\"data:,\">");
     client.println("<style>");
-    client.println("html { font-family: Helvetica; display: inline-block; margin: 0px auto; text-align: center;} ");
+    client.println("html { font-family: Helvetica; display: inline-block; margin: 0px Auto; text-align: center;} ");
     client.println(".button { background-color: #4CAF50; border: none; color: white; padding: 16px 40px;");
     client.println("text-decoration: none; font-size: 30px; margin: 2px; cursor: pointer;} ");
     client.println(".button2 { background-color: #F52718; }");
+    client.println(".button3 { background-color: #0075FF; }");  // Blue color
     client.println("</style></head>");
     client.println("<body><h1>MIE438 NEST SMART HOME PROJECT</h1>");
 
@@ -66,14 +67,15 @@ void sendWebPage(WiFiClient& client) {
 
     // Display mode state and buttons
     client.println("<p>Mode: " + mode_state + "</p>");
-    if (mode_state == "manual") {
-        client.println("<p><a href=\"/mode/auto\"><button class=\"button\">Switch to Auto</button></a></p>");
+    if (mode_state == "Manual") {
+        client.println("<p><a href=\"/mode/Auto\"><button class=\"button button2\">Switch to Auto</button></a></p>");
     } else {
-        client.println("<p><a href=\"/mode/manual\"><button class=\"button button2\">Switch to Manual</button></a></p>");
+        client.println("<p><a href=\"/mode/Manual\"><button class=\"button button3\">Auto Mode ON</button></a></p>");
+        // Changed from button2 (red) to button3 (blue)
     }
 
-    // Display buttons for LED, HEAT, and FAN (only in manual mode)
-    if (mode_state == "manual") {
+    // Display buttons for LED, HEAT, and FAN (only in Manual mode)
+    if (mode_state == "Manual") {
             sendButton(client, "LED", LED_pin_state);
             sendButton(client, "HEAT", heat_pin_state);
             sendButton(client, "FAN", fan_pin_state);
@@ -93,7 +95,7 @@ void sendButton(WiFiClient& client, const String& pin_name, String& pin_state) {
 }
 
 // Automatic control function
-void automaticControl() {
+void AutomaticControl() {
 
   //in this code 
     if (currentTemperature < LOWER_LIM) {
@@ -184,16 +186,16 @@ void loop() {
                         client.println();
 
                         //process mode change request
-                        if (header.indexOf("GET /mode/auto") >= 0) {
-                            mode_state = "auto";
+                        if (header.indexOf("GET /mode/Auto") >= 0) {
+                            mode_state = "Auto";
                             Serial.println("Switching to Automatic Mode");
-                        } else if (header.indexOf("GET /mode/manual") >= 0) {
-                            mode_state = "manual";
+                        } else if (header.indexOf("GET /mode/Manual") >= 0) {
+                            mode_state = "Manual";
                             Serial.println("Switching to Manual Mode");
                         }
 
-                        //process manual control requests (only in manual mode)
-                        if (mode_state == "manual"){ // Process the GET request
+                        //process Manual control requests (only in Manual mode)
+                        if (mode_state == "Manual"){ // Process the GET request
 
                         if (header.indexOf("GET /LED/on") >= 0) {
                             Serial.println("Turning LED ON");
@@ -224,7 +226,7 @@ void loop() {
                             fan_pin_state = "off";
                             digitalWrite(fan_pin, HIGH);
                         }
-                        //end of manual mode if statement
+                        //end of Manual mode if statement
                         }
 
                         // Send the web page to the client
@@ -245,9 +247,9 @@ void loop() {
         Serial.println("Client disconnected.");
     }
 
-    //if in automatic mode, run the automatic control logic
-    if(mode_state == "auto"){
-      automaticControl();
+    //if in Automatic mode, run the Automatic control logic
+    if(mode_state == "Auto"){
+      AutomaticControl();
     }
     
 }
