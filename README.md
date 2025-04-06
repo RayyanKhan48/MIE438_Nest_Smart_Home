@@ -1,1 +1,1 @@
-# MIE438_Temp_Home_Device
+# MIE438_Nest_Smart_Home
