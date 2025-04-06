@@ -16,9 +16,10 @@
 
 // Audio files
 const char* audioFiles[] = {
-  "/aria.wav",
   "/led_on.wav",
-  "/manual_mode.wav"
+  "/led_off.wav",
+  "/manual_mode.wav",
+  "/automatic_mode.wav"
 };
 const int NUM_FILES = sizeof(audioFiles) / sizeof(audioFiles[0]);
 
